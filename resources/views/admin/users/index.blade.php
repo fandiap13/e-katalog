@@ -52,7 +52,7 @@
                             <table class="table table-bordered table-hover text-nowrap">
                                 <thead>
                                     <tr>
-                                        <th class="text-center">No</th>
+                                        <th class="text-center" style="width: 50px">No</th>
                                         <th>Email</th>
                                         <th>Nama</th>
                                         <th class="text-center">#</th>

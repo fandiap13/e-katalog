@@ -60,8 +60,9 @@ class ProdukController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string',
+            'harga' => 'required|numeric',
+            'brand_id' => 'required',
+            'kategori' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -70,14 +71,16 @@ class ProdukController extends Controller
                 ->withInput();
         }
 
-        User::create([
+        Produk::create([
             'nama' => $request->nama,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'harga' => $request->harga,
+            'brand_id' => $request->brand_id,
+            'keterangan' => $request->keterangan,
+            'kategori_id' => $request->kategori,
         ]);
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'User berhasil dibuat.');
+        return redirect()->route('admin.produk.index')
+            ->with('success', 'Produk berhasil dibuat.');
     }
     /**
      * Display the specified resource.
@@ -98,12 +101,12 @@ class ProdukController extends Controller
      */
     public function edit($id)
     {
-        $title = "Edit User";
-        $user = User::findOrFail($id);
+        $title = "Edit Produk";
+        $produk = Produk::findOrFail($id);
         $brand = Brand::all();
         $kategori = Kategori::where("parent_id", null)->get();
 
-        return view('admin.users.edit', compact('user', 'title', 'brand', 'kategori'));
+        return view('admin.produk.edit', compact('produk', 'title', 'brand', 'kategori'));
     }
 
     /**
@@ -117,8 +120,9 @@ class ProdukController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
-            'password' => 'nullable|string',
+            'harga' => 'required|numeric',
+            'brand_id' => 'required',
+            'kategori' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -127,17 +131,17 @@ class ProdukController extends Controller
                 ->withInput();
         }
 
-        $user = User::findOrFail($id);
+        $produk = Produk::findOrFail($id);
 
-        $user->nama = $request->nama;
-        $user->email = $request->email;
-        if ($request->filled('password')) {
-            $user->password = Hash::make($request->password);
-        }
-        $user->save();
+        $produk->nama = $request->nama;
+        $produk->harga = $request->harga;
+        $produk->brand_id = $request->brand_id;
+        $produk->keterangan = $request->keterangan;
+        $produk->kategori_id = $request->kategori;
+        $produk->save();
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'User berhasil diperbarui.');
+        return redirect()->route('admin.produk.index')
+            ->with('success', 'Produk berhasil diperbarui.');
     }
 
     /**
@@ -149,17 +153,98 @@ class ProdukController extends Controller
     public function destroy($id)
     {
         try {
-            $user = User::find($id);
-            $user->delete();
+            $produk = Produk::find($id);
+
+            if (!$produk) {
+                return response()->json([
+                    'status'   => false,
+                    'message'  =>  'Produk tidak ditemukan'
+                ], 400);
+            }
+
+            if ($produk->gambar && file_exists(public_path($produk->gambar))) {
+                unlink(public_path($produk->gambar));
+            }
+
+            if ($produk->gambar_2 && file_exists(public_path($produk->gambar_2))) {
+                unlink(public_path($produk->gambar_2));
+            }
+
+            if ($produk->gambar_3 && file_exists(public_path($produk->gambar_3))) {
+                unlink(public_path($produk->gambar_3));
+            }
+
+            $produk->delete();
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([
                 'status'   => false,
-                'message'  =>  'Tidak dapat mengahapus data, data user sudah berhubungan dengan data lain'
+                'message'  =>  'Tidak dapat mengahapus data, data produk sudah berhubungan dengan data lain'
             ], 400);
         }
         return response()->json([
             'status'     => true,
-            'message' => 'Success delete user'
+            'message' => 'Success delete produk'
+        ], 200);
+    }
+
+    public function uploadgambar(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'gambar' => 'required|image|mimes:jpeg,png,jpg,svg|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'     => false,
+                'message' => $validator->errors()->first()
+            ], 400);
+        }
+
+        $produk_id = $request->produk_id;
+        $produk = Produk::find($produk_id);
+        if (!$produk) {
+            return response()->json([
+                'status'     => false,
+                'message' => "Produk tidak ditemukan!"
+            ], 400);
+        }
+
+        $file = $request->file('gambar');
+
+        // Buat nama file yang unik
+        $fileName = time() . '_' . $produk->id . '.' . $file->getClientOriginalExtension();
+
+        // Simpan gambar ke direktori public/assets/img
+        $file->move(public_path('assets/img'), $fileName);
+
+        $urlImage = "assets/img/" . $fileName;
+
+        if ($request->type == "gambar") {
+            if ($produk->gambar && file_exists(public_path($produk->gambar))) {
+                unlink(public_path($produk->gambar));
+            }
+            $produk->gambar = $urlImage;
+        }
+
+        if ($request->type == "gambar_2") {
+            if ($produk->gambar_2 && file_exists(public_path($produk->gambar_2))) {
+                unlink(public_path($produk->gambar_2));
+            }
+            $produk->gambar_2 = $urlImage;
+        }
+
+        if ($request->type == "gambar_3") {
+            if ($produk->gambar_3 && file_exists(public_path($produk->gambar_3))) {
+                unlink(public_path($produk->gambar_3));
+            }
+            $produk->gambar_3 = $urlImage;
+        }
+
+        $produk->save();
+
+        return response()->json([
+            'status'     => true,
+            'message' => 'Success upload gambar produk'
         ], 200);
     }
 }

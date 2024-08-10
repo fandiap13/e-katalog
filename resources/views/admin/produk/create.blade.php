@@ -27,7 +27,7 @@
 
 @section('main')
     <div class="container-fluid">
-        <form action="{{ route('admin.users.store') }}" method="POST" id="form" enctype="multipart/form-data">
+        <form action="{{ route('admin.produk.store') }}" method="POST" id="form" enctype="multipart/form-data">
             @csrf
             <div class="row">
                 <div class="col-lg-12">
@@ -82,8 +82,12 @@
                                 <label for="kategori" class="col-sm-2 col-form-label">Kategori Produk <b
                                         class="text-danger">*</b></label>
                                 <div class="col-sm-6 controls">
-                                    <input type="text" class="form-control" id="kategori_id" name="kategori_id"
-                                        placeholder="Kategori" required />
+                                    <button type="button" class="btn btn-sm btn-secondary"
+                                        onclick="showModalKategori();">Pilih
+                                        Kategori</button>
+                                    <div><strong>Kategori dipilih:</strong> <span class="kategori_dipilih">Belum
+                                            dipilih</span></div>
+                                    <input type="hidden" class="form-control" id="kategori_id" name="kategori" required />
                                 </div>
                             </div>
 
@@ -94,19 +98,19 @@
                                     <select class="form-control select2" name="brand_id" id="brand_id" required>
                                         <option value="">-- Pilih --</option>
                                         @foreach ($brand as $b)
-                                            <option value="{{ $b->id }}">{{ $b->nama }}</option>
+                                            <option value="{{ $b->id }}"
+                                                {{ old('brand_id') == $b->id ? 'selected' : '' }}>{{ $b->nama }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
 
-
                             <div class="form-group row">
                                 <label for="keterangan" class="col-sm-2 col-form-label">Deskripsi Produk <b
                                         class="text-danger">*</b></label>
                                 <div class="col-sm-6 controls">
-                                    <textarea class="form-control" rows="5" id="keterangan" name="keterangan" placeholder="Deskripsi Produk"
-                                        value="{{ old('keterangan') }}" required></textarea>
+                                    <textarea class="form-control" rows="5" id="keterangan" name="keterangan" placeholder="Deskripsi Produk" required>{{ old('keterangan') }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -117,6 +121,54 @@
             <!-- /.row -->
         </form>
     </div><!-- /.container-fluid -->
+
+    <div class="modal fade" id="modal-kategori" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Pilih Kategori</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 border">
+                            <ul style="list-style: none">
+                                @foreach ($kategori as $k)
+                                    <li class="my-2">
+                                        <a href="#"
+                                            onclick="handleShowChild('{{ $k->id }}','{{ $k->nama }}')"
+                                            class="font-weight-bold text-dark">
+                                            <div class="d-flex justify-content-start align-items-center"
+                                                style="gap: 10px">
+                                                <div>
+                                                    {{ $k->nama }}
+                                                </div>
+                                                <div>
+                                                    {!! count($k->subkategori) > 0 ? '<i class="fas fa-arrow-right"></i>' : '' !!}
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <div class="col-md-6 childkategori border"></div>
+                    </div>
+
+                    <hr>
+
+                    <div class="">Kategori yang dipilih: <span
+                            class="kategori_dipilih font-weight-bold mt-3"></span></div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
 @endsection
 
 @push('scripts')
@@ -125,6 +177,54 @@
     <script src="{{ asset('adminlte/plugins/select2/js/select2.full.min.js') }}"></script>
 
     <script>
+        function showModalKategori() {
+            $("#modal-kategori").modal("show");
+        }
+
+        function selectKategori(id, name) {
+            $(".kategori_dipilih").html(name);
+            $("#kategori_id").val(id);
+        }
+
+        function selectSubKategori(id, name) {
+            $(".kategori_dipilih").append(`->${name}`);
+            $("#kategori_id").val(id);
+        }
+
+        function handleShowChild(id, name) {
+            $.ajax({
+                type: "get",
+                url: "{{ url('/admin/kategori/showsubkategori') }}/" + id,
+                dataType: "json",
+                success: function(response) {
+                    if (response.data.length > 0) {
+                        let showkategori = "";
+                        response.data.forEach(element => {
+                            console.log(element);
+                            showkategori += `<li class="my-2">
+                                        <a href="#" class="font-weight-bold text-dark" onClick='selectSubKategori("${element.id}","${element.nama}")'>
+                                            <div class="d-flex justify-content-start align-items-center"
+                                                style="gap: 10px">
+                                                <div>
+                                                    ${element.nama}
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>`;
+                        });
+                        let kategoriHtml = `<ul style="list-style: none">${showkategori}</ul>`;
+                        $(".childkategori").html(kategoriHtml);
+                        // pilih kategori
+                        selectKategori(id, name);
+                    } else {
+                        $(".childkategori").html("");
+                        // pilih kategori
+                        selectKategori(id, name);
+                    }
+                }
+            });
+        }
+
         $(document).ready(function() {
             //Initialize Select2 Elements
             $('.select2').select2({

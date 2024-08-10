@@ -29,6 +29,8 @@ class AddNewFieldToProdukTable extends Migration
     {
         Schema::table('produk', function (Blueprint $table) {
             $table->dropForeign(['brand_id']);
+
+            $table->dropColumn('brand_id');
         });
     }
 }

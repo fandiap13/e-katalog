@@ -41,7 +41,7 @@
                         <form action="" method="GET">
                             <div class="form-group row">
                                 <div class="col-md-11"> <input type="text" class="form-control" name="search"
-                                        value="{{ $search }}" placeholder="Cari user..."></div>
+                                        value="{{ $search }}" placeholder="Cari produk..."></div>
                                 <div class="col-md-1">
                                     <button class="btn btn-block btn-primary" type="submit"><i class="fa fa-search"></i>
                                     </button>
@@ -52,8 +52,8 @@
                             <table class="table table-bordered table-hover text-nowrap">
                                 <thead>
                                     <tr>
-                                        <th class="text-center" style="width: 10%">No</th>
-                                        <th>Gambar</th>
+                                        <th class="text-center" style="width: 50px">No</th>
+                                        <th class="text-center">Gambar</th>
                                         <th>Produk</th>
                                         <th>Harga</th>
                                         <th class="text-center">#</th>
@@ -67,15 +67,30 @@
                                     @endif
 
                                     @foreach ($data as $key => $row)
+                                        @php
+                                            $img = $row->gambar
+                                                ? asset($row->gambar)
+                                                : asset('assets/img/no-image.png');
+                                        @endphp
                                         <tr>
                                             <td class="text-center">{{ $key + 1 }}</td>
-                                            <td>{{ $row->gambar }}</td>
+                                            <td class="text-center">
+                                                <a href="{{ $img }}" target="_blank">
+                                                    <img style="width: 120px; height: 120px; object-fit: contain;background-color: lightgray"
+                                                        src="{{ $img }}" alt="Gambar Produk">
+                                                </a>
+                                            </td>
                                             <td>
-                                                <h3>{{ $row->nama }}</h3>
+                                                <a href="{{ url('/produk/' . $row->id) }}" target="_blank">
+                                                    <h6 class="font-weight-bold">{{ $row->nama }}</h6>
+                                                </a>
                                                 <div class="row">
                                                     <ul>
-                                                        <li><strong>Kategori: </strong></li>
-                                                        <li><strong>Brand: </strong></li>
+                                                        <li><strong>Kategori:
+                                                            </strong>
+                                                            {{ $row->kategori->parent_id ? $row->kategori->parentKategori->nama . '->' . $row->kategori->nama : $row->kategori->nama }}
+                                                        </li>
+                                                        <li><strong>Brand: </strong>{{ $row->brand->nama }}</li>
                                                     </ul>
                                                 </div>
                                             </td>

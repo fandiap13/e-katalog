@@ -41,8 +41,8 @@ class KategoriController extends Controller
     public function create()
     {
         $title = "Tambah Kategori";
-        // $parentKategori = Kategori::where('parent_id', null)->get();
-        $parentKategori = Kategori::get();
+        $parentKategori = Kategori::where('parent_id', null)->get();
+        // $parentKategori = Kategori::get();
 
         return view('admin.kategori.create', compact('title', 'parentKategori'));
     }
@@ -96,8 +96,8 @@ class KategoriController extends Controller
     {
         $title = "Edit Kategori";
         $kategori = Kategori::findOrFail($id);
-        // $parentKategori = Kategori::where('parent_id', null)->get();
-        $parentKategori = Kategori::get();
+        $parentKategori = Kategori::where('parent_id', null)->get();
+        // $parentKategori = Kategori::get();
         return view('admin.kategori.edit', compact('kategori', 'title', 'parentKategori'));
     }
 
@@ -152,5 +152,17 @@ class KategoriController extends Controller
             'status'     => true,
             'message' => 'Success delete kategori'
         ], 200);
+    }
+
+    public function showsubkategori($id)
+    {
+        $subkategori = Kategori::where('parent_id', $id)->get();
+
+        $data = [
+            'total' => count($subkategori),
+            'data' => $subkategori
+        ];
+
+        return response()->json($data, 200);
     }
 }

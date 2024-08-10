@@ -15,4 +15,9 @@ class Kategori extends Model
     {
         return $this->hasMany(Kategori::class, 'parent_id', 'id');
     }
+
+    protected function parentkategori()
+    {
+        return $this->belongsTo(Kategori::class, 'parent_id', 'id');
+    }
 }

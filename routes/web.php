@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 });
 
 Route::prefix('auth')->as('auth.')->middleware('guest')->group(function () {
@@ -30,8 +30,14 @@ Route::prefix('auth')->as('auth.')->middleware('guest')->group(function () {
 
 Route::prefix('admin')->as('admin.')->middleware('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+
     Route::resource('users', UsersController::class)->except(['show']);
+
     Route::resource('brand', BrandController::class)->except(['show']);
+
+    Route::get("/kategori/showsubkategori/{id}", [KategoriController::class, "showsubkategori"]);
     Route::resource('kategori', KategoriController::class);
-    Route::resource('produk', ProdukController::class);
+
+    Route::post("/produk/uploadgambar", [ProdukController::class, "uploadgambar"]);
+    Route::resource('produk', ProdukController::class)->except(['show']);
 });
