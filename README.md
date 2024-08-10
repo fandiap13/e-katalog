@@ -24,8 +24,11 @@
     cp .env.example .env
     php artisan key:generate
     ```
-4. Buat database `db_katalog` dan setting env
+4. Buat database `db_katalog` dan setting file .env
    ```bash
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
    DB_DATABASE=db_katalog
    ```
 6. Migrasi database
