@@ -11,7 +11,7 @@
 1. Clone repositori
 
     ```bash
-    git clone https://github.com/fandiap13/test-pegawai.git
+    git clone https://github.com/fandiap13/e-katalog.git
     cd repository
     ```
 
@@ -24,12 +24,15 @@
     cp .env.example .env
     php artisan key:generate
     ```
-4. Buat database `db_katalog`
-5. Migrasi database
+4. Buat database `db_katalog` dan setting env
+   ```bash
+   DB_DATABASE=db_katalog
+   ```
+6. Migrasi database
     ```
     php artisan migrate
     ```
-6. Jalankan server lokal
+7. Jalankan server lokal
 
     ```
     php artisan serve
