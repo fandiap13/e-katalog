@@ -33,7 +33,8 @@ class AuthController extends Controller
 
         if (Auth::attempt($request->only('email', 'password'))) {
             $request->session()->regenerate();
-            return redirect()->intended();
+            // return redirect()->intended();
+            return redirect()->route('admin.dashboard.index');
         }
 
         return redirect()->back()->withErrors([

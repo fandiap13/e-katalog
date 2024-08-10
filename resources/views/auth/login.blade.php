@@ -50,11 +50,8 @@
                     </div>
                 </form>
 
-                <p class="mb-0 mt-3">
-                    <a href="{{ url('auth/register') }}" class="text-center">Register a new membership</a>
-                </p>
-                <p class="my-1">
-                    <a href="{{ url('/') }}">Back to home</a>
+                <p class="my-2">
+                    <a href="{{ url('/') }}">Kembali ke beranda</a>
                 </p>
             </div>
             <!-- /.login-card-body -->

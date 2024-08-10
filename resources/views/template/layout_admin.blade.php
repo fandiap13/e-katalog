@@ -161,8 +161,7 @@
 
         <!-- Main Footer -->
         <footer class="main-footer">
-            <strong>Copyright &copy; {{ date('Y') }} <a href="https://fikom.udb.ac.id/" target="_blank">FIKOM
-                    UDB</a>.</strong> All
+            <strong>Copyright &copy; {{ date('Y') }} <a href="" target="_blank">KIDS MATE</a>.</strong> All
             rights
             reserved.
         </footer>

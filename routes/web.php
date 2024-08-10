@@ -28,6 +28,8 @@ Route::prefix('auth')->as('auth.')->middleware('guest')->group(function () {
     Route::post('login-process', [AuthController::class, 'process_login']);
 });
 
+Route::get('logout', [AuthController::class, 'logout']);
+
 Route::prefix('admin')->as('admin.')->middleware('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
