@@ -1,9 +1,12 @@
 # E-KATALOG
 
-## Prasyarat
+## Persyaratan
 
 -   PHP >= 7.1
--   Composer
+-   Install Composer
+      ```bash
+      https://getcomposer.org/Composer-Setup.exe
+      ```
 -   Laravel
 
 ## Instalasi
