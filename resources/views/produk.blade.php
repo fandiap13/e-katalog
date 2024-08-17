@@ -179,9 +179,17 @@
                                         <p>Urutkan Berdasarkan:</p>
                                         <select name="pengurutan">
                                             <option value="">-- pilih --</option>
-                                            <option value="asc" {{ $pengurutan == 'asc' ? 'selected' : '' }}>Termurah
+                                            <option value="termurah" {{ $pengurutan == 'termurah' ? 'selected' : '' }}>
+                                                Termurah
                                             </option>
-                                            <option value="desc" {{ $pengurutan == 'desc' ? 'selected' : '' }}>Termahal
+                                            <option value="termahal" {{ $pengurutan == 'termahal' ? 'selected' : '' }}>
+                                                Termahal
+                                            </option>
+                                            <option value="terbaru" {{ $pengurutan == 'terbaru' ? 'selected' : '' }}>
+                                                Terbaru
+                                            </option>
+                                            <option value="terdahulu" {{ $pengurutan == 'terdahulu' ? 'selected' : '' }}>
+                                                Terdahulu
                                             </option>
                                         </select>
                                         <button type="submit" class="btn btn-primary"><i class="fa fa-filter"></i>
@@ -209,10 +217,13 @@
                                 <a href="{{ url('produk/' . $row->id) }}">
                                     <div class="product__item">
                                         <div class="product__item__pic set-bg" data-setbg="{{ $img }}">
-                                            <span class="label">New</span>
+                                            {{-- <span class="label">New</span> --}}
                                         </div>
                                         <div class="product__item__text">
                                             <h6>{{ $row->nama }}</h6>
+                                            <h6 class="mb-1 text-secondary">
+                                                {{ $row->kategori->parent_id ? $row->kategori->parentKategori->nama . ', ' . $row->kategori->nama : $row->kategori->nama }}
+                                            </h6>
                                             <h5>Rp. {{ number_format($row->harga, 0, ',', '.') }}</h5>
                                             @foreach ($row->warna as $warna)
                                                 <div class="product__color__select">

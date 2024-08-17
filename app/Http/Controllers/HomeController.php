@@ -16,7 +16,7 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        $produk = Produk::limit(8)->orderBy('created_at', 'desc')->get();
+        $produk = Produk::limit(4)->orderBy('created_at', 'desc')->get();
         return view("home", [
             'title' => "Beranda",
             'data' => $produk,
@@ -25,7 +25,6 @@ class HomeController extends Controller
 
     public function produk(Request $request)
     {
-
         $search = $request->get('search') ? strtolower($request->get('search')) : "";
         $kategori_id = $request->get('kategori');
         $brand_id = $request->get('brand');
@@ -45,7 +44,7 @@ class HomeController extends Controller
             $query->where('produk.brand_id', $brand_id);
         }
 
-        // pencarian brand
+        // pencarian kategori
         if (!empty($kategori_id)) {
             $query->where('produk.kategori_id', $kategori_id);
         }
@@ -56,12 +55,21 @@ class HomeController extends Controller
         }
 
         if ($pengurutan) {
-            $query->orderByRaw('CAST(produk.harga AS UNSIGNED) ' . $pengurutan);
-        } else {
-            $query->orderBy("id", "DESC");
+            if ($pengurutan == 'terdahulu') {
+                $query->orderBy('produk.created_at', "ASC");
+            }
+            if ($pengurutan == 'terbaru') {
+                $query->orderBy('produk.created_at', "DESC");
+            }
+            if ($pengurutan == 'termurah') {
+                $query->orderByRaw('CAST(produk.harga AS UNSIGNED) ASC');
+            }
+            if ($pengurutan == 'termahal') {
+                $query->orderByRaw('CAST(produk.harga AS UNSIGNED) DESC');
+            }
         }
 
-        $data = $query->paginate(10)->appends([
+        $data = $query->paginate(12)->appends([
             'search' => $search,
             'pengurutan' => $pengurutan,
             'harga_awal' => $harga_awal,
@@ -90,25 +98,33 @@ class HomeController extends Controller
 
     public function detailproduk($id)
     {
-        $produk = Produk::orderBy('created_at', 'desc')->get();
-        $kategori = Kategori::all();
-        $brand = Brand::all();
+        $produk = Produk::findOrFail($id);
 
-        return view("produk", [
-            'title' => "Daftar Produk",
+        $produk_terkait = Produk::select("produk.*")
+            ->where('kategori_id', $produk->kategori_id)
+            ->orWhere('brand_id', $produk->brand_id)
+            ->limit(4)
+            ->get();
+
+        return view("detail_produk", [
+            'title' => "Detail Produk",
             'data' => $produk,
-            'kategori' => $kategori,
-            'brand' => $brand,
+            'produk_terkait' => $produk_terkait,
+            'link_produk_terkait' => url('produk?kategori=' . $produk->kategori_id . '&brand=' . $produk->brand_id)
         ]);
     }
 
     public function tentangkami(Request $request)
     {
-        return "on going";
+        return view('tentangkami', [
+            'title' => "Tentang Kami"
+        ]);
     }
 
     public function faq(Request $request)
     {
-        return "on going";
+        return view('faq', [
+            'title' => "FAQ"
+        ]);
     }
 }

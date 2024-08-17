@@ -47,6 +47,9 @@
                                 </div>
                                 <div class="product__item__text">
                                     <h6>{{ $row->nama }}</h6>
+                                    <h6 class="mb-1 text-secondary">
+                                        {{ $row->kategori->parent_id ? $row->kategori->parentKategori->nama . ', ' . $row->kategori->nama : $row->kategori->nama }}
+                                    </h6>
                                     <h5>Rp. {{ number_format($row->harga, 0, ',', '.') }}</h5>
                                     @foreach ($row->warna as $warna)
                                         <div class="product__color__select">
