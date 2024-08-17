@@ -10,6 +10,12 @@
             <div class="hero__items set-bg" data-setbg="{{ asset('assets/img/banner2.webp') }}">
 
             </div>
+            <div class="hero__items set-bg" data-setbg="{{ asset('assets/img/banner3.webp') }}">
+
+            </div>
+            <div class="hero__items set-bg" data-setbg="{{ asset('assets/img/banner4.webp') }}">
+
+            </div>
         </div>
     </section>
     <!-- Hero Section End -->
@@ -25,6 +31,10 @@
                 </div>
             </div>
             <div class="row product__filter">
+                @if (count($data) == 0)
+                    <h4 class="text-center">Produk kosong...</h4>
+                @endif
+
                 @foreach ($data as $row)
                     @php
                         $img = $row->gambar ? asset($row->gambar) : asset('assets/img/no-image.png');
@@ -50,6 +60,13 @@
                         </a>
                     </div>
                 @endforeach
+
+                @if (count($data) > 0)
+                    <div class="w-100 d-flex justify-content-center">
+                        <a href="{{ url('produk') }}" class="btn btn-primary text-center">Lihat Semua Produk <i
+                                class="fa fa-arrow-right"></i></a>
+                    </div>
+                @endif
             </div>
         </div>
     </section>
