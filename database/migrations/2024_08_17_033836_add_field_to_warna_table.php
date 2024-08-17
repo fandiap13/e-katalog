@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateVariansTable extends Migration
+class AddFieldToWarnaTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,8 @@ class CreateVariansTable extends Migration
      */
     public function up()
     {
-        Schema::create('varian', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama', 150);
-            $table->text('keterangan')->nullable();
-            $table->timestamps();
+        Schema::table('warna', function (Blueprint $table) {
+            $table->text('bg_color')->nullable();
         });
     }
 
@@ -28,6 +25,8 @@ class CreateVariansTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('varian');
+        Schema::table('warna', function (Blueprint $table) {
+            $table->dropColumn('bg_color');
+        });
     }
 }

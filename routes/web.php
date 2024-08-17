@@ -6,6 +6,7 @@ use App\Http\Controllers\admin\KategoriController;
 use App\Http\Controllers\admin\ProdukController;
 use App\Http\Controllers\admin\UsersController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,9 +20,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('home');
-});
+Route::get('/', [HomeController::class, 'index']);
+Route::get('/produk', [HomeController::class, 'produk']);
+Route::get('/produk/{id}', [HomeController::class, 'detailproduk']);
+Route::get('/tentangkami', [HomeController::class, 'tentangkami']);
+Route::get('/faq', [HomeController::class, 'faq']);
 
 Route::prefix('auth')->as('auth.')->middleware('guest')->group(function () {
     Route::get('login', [AuthController::class, 'index'])->name('login');
@@ -40,6 +43,10 @@ Route::prefix('admin')->as('admin.')->middleware('admin')->group(function () {
     Route::get("/kategori/showsubkategori/{id}", [KategoriController::class, "showsubkategori"]);
     Route::resource('kategori', KategoriController::class);
 
+    Route::resource('produk', ProdukController::class);
     Route::post("/produk/uploadgambar", [ProdukController::class, "uploadgambar"]);
-    Route::resource('produk', ProdukController::class)->except(['show']);
+    Route::delete("/produk/deletewarnaproduk/{id}", [ProdukController::class, "destroywarnaproduk"]);
+    Route::post("/produk/addwarnaproduk", [ProdukController::class, "addwarnaproduk"]);
+    Route::post("/produk/updatewarnaproduk", [ProdukController::class, "updatewarnaproduk"]);
+    Route::get("/produk/detailwarna/{id}", [ProdukController::class, "detailwarna"]);
 });

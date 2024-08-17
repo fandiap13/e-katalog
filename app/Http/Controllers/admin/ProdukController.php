@@ -7,6 +7,7 @@ use App\Models\Brand;
 use App\Models\Kategori;
 use App\Models\Produk;
 use App\Models\User;
+use App\Models\Warna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -30,6 +31,7 @@ class ProdukController extends Controller
         $query->whereRaw('LOWER(produk.nama) LIKE ?', ['%' . $search . '%']);
         $query->orWhereRaw('LOWER(kategori.nama) LIKE ?', ['%' . $search . '%']);
         $query->orWhereRaw('LOWER(brand.nama) LIKE ?', ['%' . $search . '%']);
+        $query->orderBy("id", "DESC");
         $data = $query->paginate(10)->appends(['search' => $search]);
 
         return view('admin.produk.index', compact('data', 'title', 'search'));
@@ -245,6 +247,79 @@ class ProdukController extends Controller
         return response()->json([
             'status'     => true,
             'message' => 'Success upload gambar produk'
+        ], 200);
+    }
+
+    public function addwarnaproduk(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'warna' => 'required|string|max:150',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        Warna::create([
+            'warna' => $request->warna,
+            'bg_color' => $request->bg_color,
+            'keterangan' => $request->keterangan,
+            'produk_id' => $request->produk_id,
+        ]);
+
+        return redirect()->to(url('admin/produk/' . $request->produk_id . '/edit'))
+            ->with('success', 'Warna produk berhasil ditambahkan.');
+    }
+
+    public function updatewarnaproduk(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'warna' => 'required|string|max:150',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $warna = Warna::findOrFail($request->id);
+        $warna->warna = $request->warna;
+        $warna->bg_color = $request->bg_color;
+        $warna->keterangan = $request->keterangan;
+        $warna->produk_id = $request->produk_id;
+        $warna->save();
+
+        return redirect()->to(url('admin/produk/' . $request->produk_id . '/edit'))
+            ->with('success', 'Warna produk berhasil diubah.');
+    }
+
+    public function destroywarnaproduk($id)
+    {
+        try {
+            $warnaproduk = Warna::findOrFail($id);
+            $warnaproduk->delete();
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'status'   => false,
+                'message'  =>  'Tidak dapat mengahapus data, data warna sudah berhubungan dengan data lain'
+            ], 400);
+        }
+        return response()->json([
+            'status'     => true,
+            'message' => 'Success menghapus warna produk'
+        ], 200);
+    }
+
+    public function detailwarna($id)
+    {
+        $warna = Warna::findOrFail($id);
+
+        return response()->json([
+            'status' => true,
+            'data' => $warna
         ], 200);
     }
 }

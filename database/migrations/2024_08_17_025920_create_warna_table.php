@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDetailVariansTable extends Migration
+class CreateWarnaTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,13 @@ class CreateDetailVariansTable extends Migration
      */
     public function up()
     {
-        Schema::create('detail_varian', function (Blueprint $table) {
+        Schema::create('warna', function (Blueprint $table) {
             $table->id();
-            $table->string('nama', 150);
-            $table->text('keterangan')->nullable();
-            $table->foreignId('varian_id')->nullable()
-                ->constrained('varian')
+            $table->foreignId('produk_id')->nullable()
+                ->constrained('produk')
                 ->onDelete('restrict'); // Menambahkan onDelete restrict
+            $table->string("warna", 150);
+            $table->text('keterangan')->nullable();
             $table->timestamps();
         });
     }
@@ -31,10 +31,12 @@ class CreateDetailVariansTable extends Migration
      */
     public function down()
     {
-        Schema::table('detail_varian', function (Blueprint $table) {
+        // delete variant product
+        Schema::table('warna', function (Blueprint $table) {
             // Hapus foreign key sebelum menghapus tabel
-            $table->dropForeign(['varian_id']);
+            $table->dropForeign(['produk_id']);
         });
-        Schema::dropIfExists('detail_varian');
+
+        Schema::dropIfExists('warna');
     }
 }

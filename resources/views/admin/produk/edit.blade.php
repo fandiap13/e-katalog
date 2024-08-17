@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/select2/css/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
 
+    <!-- DataTables -->
+    <link rel="stylesheet" href="{{ asset('adminlte') }}/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="{{ asset('adminlte') }}/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="{{ asset('adminlte') }}/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+
     <style>
         .image-preview {
             width: 100%;
@@ -146,7 +151,8 @@
                                 <label for="keterangan" class="col-sm-2 col-form-label">Deskripsi Produk <b
                                         class="text-danger">*</b></label>
                                 <div class="col-sm-6 controls">
-                                    <textarea class="form-control" rows="5" id="keterangan" name="keterangan" placeholder="Deskripsi Produk" required>{{ old('keterangan', $produk->keterangan) }}</textarea>
+                                    <textarea class="form-control" rows="5" id="keterangan" name="keterangan" placeholder="Deskripsi Produk"
+                                        required>{{ old('keterangan', $produk->keterangan) }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -160,11 +166,60 @@
                 <div class="card card-primary card-outline">
                     <div class="card-header">
                         <h5 class="card-title">
-                            Kelola Variasi Produk <strong>{{ $produk->nama }}</strong>
+                            Kelola Warna Produk <strong>{{ $produk->nama }}</strong>
                         </h5>
+
+                        <div class="card-tools">
+                            <ul class="nav nav-pills ml-auto">
+                                <li class="nav-item">
+                                    <button type="button" class="btn btn-primary" onclick="showModalTambahWarna();"><i
+                                            class="fa fa-plus"></i></button>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                     <div class="card-body">
-
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered table-hover text-nowrap datatable">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center" style="width: 50px">No</th>
+                                        <th class="text-center">Warna</th>
+                                        <th class="text-center">Kode warna</th>
+                                        <th>Keterangan</th>
+                                        <th class="text-center">#</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($produk->warna as $key => $row)
+                                        <tr>
+                                            <td class="text-center">{{ $key + 1 }}</td>
+                                            <td>{{ $row->warna }}</td>
+                                            <td class="text-center">
+                                                <div
+                                                    style="width: 100%; display: flex; justify-content: center; align-items: center;">
+                                                    <div style="width: 50px; height: 50px; background-color: {{ $row->bg_color }}; cursor: pointer"
+                                                        title="{{ $row->bg_color }}">
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{{ $row->keterangan }}</td>
+                                            <td class="text-center">
+                                                <div class="btn-group">
+                                                    <button onclick="editColor('{{ $row->id }}')"
+                                                        class="btn btn-sm btn-primary"><i class="fa fa-edit"></i></button>
+                                                </div>
+                                                <div class="btn-group">
+                                                    <button onclick="destroyColor('{{ $row->id }}')"
+                                                        class="btn btn-sm btn-danger"><i
+                                                            class="fa fa-trash-alt"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <div class="overlay d-none">
                         <i class="fa fa-2x fa-sync-alt fa-spin"></i>
@@ -237,6 +292,44 @@
         </div>
     </div><!-- /.container-fluid -->
 
+    <!-- Modal warna -->
+    <div class="modal fade" id="modal-warna" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ url('admin/produk/addwarnaproduk') }}" method="POST" id="formwarna">
+                    @csrf
+                    <div class="modal-header">
+                        <h4 class="modal-title">Tambah Warna Produk</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="produk_id" value="{{ $produk->id }}">
+                        <input type="hidden" name="id" id="idwarna">
+                        <div class="form-group">
+                            <label for="warna">Warna</label>
+                            <input type="text" id="warna" name="warna" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bg_color">Kode Warna</label>
+                            <input type="text" id="bg_color" name="bg_color" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="keterangan">Keterangan</label>
+                            <textarea name="keterangan" id="keterangan" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Simpan</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
     <!-- Modal Kategori -->
     <div class="modal fade" id="modal-kategori" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog modal-lg">
@@ -287,6 +380,28 @@
     <script src="{{ asset('adminlte/plugins/bootstrap-fileinput/js/fileinput.min.js') }}"></script>
     <script src="{{ asset('adminlte/plugins/bootstrap-fileinput/themes/explorer-fas/theme.min.js') }}"></script>
     <script src="{{ asset('adminlte/plugins/select2/js/select2.full.min.js') }}"></script>
+
+    <!-- DataTables  & Plugins -->
+    <script src="{{ asset('adminlte') }}/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="{{ asset('adminlte') }}/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="{{ asset('adminlte') }}/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="{{ asset('adminlte') }}/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="{{ asset('adminlte') }}/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="{{ asset('adminlte') }}/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+
+    <script>
+        $(function() {
+            $('.datatable').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+            });
+        });
+    </script>
 
     <script>
         function previewImage(input, previewId) {
@@ -393,6 +508,41 @@
             $("#modal-kategori").modal("show");
         }
 
+        function showModalTambahWarna() {
+            $("#modal-warna").modal("show");
+        }
+
+        function clearFormModalWarna() {
+            $("#modal-warna .modal-title").html("Tambah Warna Produk");
+            $("#formwarna").attr("action", `{{ url('admin/produk/addwarnaproduk') }}`);
+            $("#formwarna #warna").val("");
+            $("#formwarna #keterangan").val("");
+            $("#formwarna #bg_color").val("");
+            $("#formwarna #idwarna").val("");
+        }
+
+        function editColor(id) {
+            $.ajax({
+                type: "get",
+                url: `{{ url('admin/produk/detailwarna') }}/${id}`,
+                dataType: "json",
+                success: function(response) {
+                    // console.log(response.data);
+                    $("#modal-warna .modal-title").html("Edit Warna Produk");
+                    $("#formwarna").attr("action", `{{ url('admin/produk/updatewarnaproduk') }}`);
+                    $("#formwarna #warna").val(response.data.warna);
+                    $("#formwarna #keterangan").val(response.data.keterangan);
+                    $("#formwarna #bg_color").val(response.data.bg_color);
+                    $("#formwarna #idwarna").val(response.data.id);
+                    showModalTambahWarna();
+                },
+                error: function(xhr, status, error) {
+                    // Menampilkan alert jika terjadi error
+                    alert(`Terjadi kesalahan: ${xhr.status} - ${xhr.statusText}`);
+                }
+            });
+        }
+
         function selectKategori(id, name) {
             $(".kategori_dipilih").html(name);
             $("#kategori_id").val(id);
@@ -471,6 +621,100 @@
                     form.submit();
                 }
             });
+
+            $('#formwarna').validate({
+                errorElement: 'span',
+                errorPlacement: function(error, element) {
+                    error.addClass('invalid-feedback');
+                    if (element.is(':file')) {
+                        error.insertAfter(element.parent().parent().parent());
+                    } else
+                    if (element.parent('.input-group').length) {
+                        error.insertAfter(element.parent());
+                    } else
+                    if (element.attr('type') == 'checkbox') {
+                        error.insertAfter(element.parent());
+                    } else {
+                        error.insertAfter(element);
+                    }
+                },
+                highlight: function(element, errorClass, validClass) {
+                    $(element).addClass('is-invalid');
+                },
+                unhighlight: function(element, errorClass, validClass) {
+                    $(element).removeClass('is-invalid');
+                },
+                submitHandler: function(form) {
+                    $("#formwarna").find("button[type=submit]").attr('disabled', true).html(
+                        "<i class='fa fa-spin fa-sync-alt'></i>");
+                    form.submit();
+                }
+            });
+
+            $('#modal-warna').on('hidden.bs.modal', function() {
+                clearFormModalWarna();
+            });
         });
+
+        function destroyColor(id) {
+            bootbox.confirm({
+                buttons: {
+                    confirm: {
+                        label: '<i class="fa fa-check"></i>',
+                        className: 'btn-danger'
+                    },
+                    cancel: {
+                        label: '<i class="fa fa-undo"></i>',
+                        className: 'btn-default'
+                    },
+                },
+                title: "Yakin ingin menghapus warna produk?",
+                message: "Warna produk yang dihapus tidak dapat dikembalikan!",
+                callback: function(result) {
+                    if (result) {
+                        var data = {
+                            _token: "{{ csrf_token() }}",
+                        };
+                        $.ajax({
+                            url: "{{ url('admin/produk/deletewarnaproduk/') }}/" + id,
+                            dataType: 'json',
+                            data: data,
+                            type: 'DELETE',
+                            beforeSend: function() {
+                                $('.overlay').removeClass('d-none');
+                            }
+                        }).done(function(response) {
+                            $('.overlay').addClass('d-none');
+                            if (response.status) {
+                                $.gritter.add({
+                                    title: 'Success!',
+                                    text: response.message,
+                                    class_name: 'gritter-success',
+                                    time: 5000,
+                                });
+                                location.reload();
+                            } else {
+                                $.gritter.add({
+                                    title: 'Warning!',
+                                    text: response.message,
+                                    class_name: 'gritter-warning',
+                                    time: 5000,
+                                });
+                            }
+                        }).fail(function(response) {
+                            var response = response.responseJSON;
+                            $('.overlay').addClass('d-none');
+                            $.gritter.add({
+                                title: 'Error!',
+                                text: response.message ? response.message :
+                                    'Terdapat kesalahan pada sistem!',
+                                class_name: 'gritter-error',
+                                time: 5000,
+                            });
+                        })
+                    }
+                }
+            });
+        }
     </script>
 @endpush

@@ -20,4 +20,9 @@ class Produk extends Model
     {
         return $this->belongsTo(Brand::class, 'brand_id', 'id');
     }
+
+    protected function warna()
+    {
+        return $this->hasMany(Warna::class, 'produk_id', 'id');
+    }
 }
