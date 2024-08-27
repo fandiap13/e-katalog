@@ -62,12 +62,12 @@
                         </ul>
                     </nav>
                 </div>
-                <div class="col-lg-3 col-md-3">
+                {{-- <div class="col-lg-3 col-md-3">
                     <div class="header__nav__option">
                         <a href="#" class="search-switch"><img
                                 src="{{ asset('malefashion-master') }}/img/icon/search.png" alt=""></a>
                     </div>
-                </div>
+                </div> --}}
             </div>
             <div class="canvas__open"><i class="fa fa-bars"></i></div>
         </div>

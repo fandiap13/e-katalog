@@ -24,17 +24,102 @@ class ProdukController extends Controller
     {
         $title = "List Produk";
 
-        $search = $request->get('search') ? strtolower($request->get('search')) : "";
+        $search = false;
+
+        $nama = $request->get('nama') ? strtolower($request->get('nama')) : "";
+        $keterangan = $request->get('keterangan') ? strtolower($request->get('keterangan')) : "";
+        $harga = $request->get('harga') ? strtolower($request->get('harga')) : "";
+        $brand_id = $request->get('brand_id') ? strtolower($request->get('brand_id')) : "";
+        $kategori_id = $request->get('kategori_id') ? strtolower($request->get('kategori_id')) : "";
+
+        $brand = Brand::all();
+        $kategori = Kategori::all();
+
         $query = Produk::select("produk.*");
         $query->join('kategori', 'kategori.id', '=', 'produk.kategori_id');
-        $query->join('brand', 'brand.id', '=', 'produk.brand_id');
-        $query->whereRaw('LOWER(produk.nama) LIKE ?', ['%' . $search . '%']);
-        $query->orWhereRaw('LOWER(kategori.nama) LIKE ?', ['%' . $search . '%']);
-        $query->orWhereRaw('LOWER(brand.nama) LIKE ?', ['%' . $search . '%']);
-        $query->orderBy("id", "DESC");
-        $data = $query->paginate(10)->appends(['search' => $search]);
+        $query->leftJoin('brand', 'brand.id', '=', 'produk.brand_id');
 
-        return view('admin.produk.index', compact('data', 'title', 'search'));
+        if ($nama != "") {
+            $search = true;
+            $query->whereRaw('LOWER(produk.nama) LIKE ?', ['%' . $nama . '%']);
+        }
+
+        if ($keterangan != "") {
+            $search = true;
+            $query->whereRaw('LOWER(produk.keterangan) LIKE ?', ['%' . $keterangan . '%']);
+        }
+
+        if ($harga != "") {
+            $search = true;
+            $query->whereRaw('LOWER(produk.harga) LIKE ?', ['%' . $harga . '%']);
+        }
+
+        // pencarian brand
+        // if ($brand_id != "") {
+        //     $search = true;
+        //     $query->where('produk.brand_id', $brand_id);
+        // }
+
+        // pencarian kategori
+        if ($kategori_id != "") {
+            $search = true;
+            $query->where('produk.kategori_id', $kategori_id);
+        }
+
+        $query->orderBy("id", "DESC");
+        $data = $query->paginate(10)->appends([
+            'nama' => $nama,
+            'keterangan' => $keterangan,
+            'harga' => $harga,
+            // 'brand_id' => $brand_id,
+            'kategori_id' => $kategori_id,
+        ]);
+
+        $validatedData = [
+            'nama' => $nama,
+            // 'brand_id' => $brand_id,
+            'kategori_id' => $kategori_id,
+            'keterangan' => $keterangan,
+            'harga' => $harga,
+        ];
+
+        // Preprocessing teks (Cleaning, Case Folding, Tokenisasi, Lemmatization, Stopword Removal)
+        $inputText = implode(' ', $validatedData);
+        $preprocessedInput = $this->preprocessText($inputText);
+
+        // Dapatkan data produk sepeda
+        $products = $data;
+        $documentVectors = $products->map(function ($product) use ($preprocessedInput) {
+            $productText = implode(' ', [
+                $product->nama,
+                $product->harga,
+                $product->keterangan,
+                $product->kategori_id,
+                // $product->brand_id,
+            ]);
+            $preprocessedProductText = $this->preprocessText($productText);
+
+            // Hitung TF-IDF dan Cosine Similarity
+            $tfidfProduct = $this->calculateTFIDF($preprocessedProductText, $preprocessedInput);
+            $tfidfInput = $this->calculateTFIDF($preprocessedInput, $preprocessedInput);
+            $similarity = $this->cosineSimilarity($tfidfProduct, $tfidfInput);
+
+            $product->similarity = $similarity * 100; // Convert to percentage
+
+            return $product;
+        });
+
+        // Urutkan berdasarkan similarity secara descending
+        $recommendedProducts = $documentVectors->sortByDesc('similarity');
+
+        // echo "<pre>";
+        // foreach ($products as $key => $value) {
+        //     print_r($value);
+        // }
+        // echo "</pre>";
+        // return;
+
+        return view('admin.produk.index', compact('data', 'title', 'brand_id', 'kategori_id', 'brand', 'kategori', 'nama', 'keterangan', 'harga', 'search'));
     }
 
 
@@ -63,7 +148,7 @@ class ProdukController extends Controller
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'harga' => 'required|numeric',
-            'brand_id' => 'required',
+            // 'brand_id' => 'required',
             'kategori' => 'required',
         ]);
 
@@ -76,7 +161,7 @@ class ProdukController extends Controller
         Produk::create([
             'nama' => $request->nama,
             'harga' => $request->harga,
-            'brand_id' => $request->brand_id,
+            // 'brand_id' => $request->brand_id,
             'keterangan' => $request->keterangan,
             'kategori_id' => $request->kategori,
         ]);
@@ -321,5 +406,81 @@ class ProdukController extends Controller
             'status' => true,
             'data' => $warna
         ], 200);
+    }
+
+
+    private function preprocessText($text)
+    {
+        // Cleaning
+        $text = preg_replace('/[^a-zA-Z0-9\s]/', '', $text);
+
+        // Case Folding
+        $text = strtolower($text);
+
+        // Tokenisasi
+        $tokens = explode(' ', $text);
+
+        // Lemmatization
+        $lemmas = array_map([$this, 'lemma'], $tokens);
+
+        // Stopword Removal (Contoh stopwords: 'dan', 'yang', 'di')
+        $stopwords = ['dan', 'yang', 'di'];
+        $filteredTokens = array_diff($lemmas, $stopwords);
+
+        return $filteredTokens;
+    }
+
+    private function lemma($word)
+    {
+        // Logika lemmatization sederhana (ganti dengan algoritma lemmatization sesungguhnya)
+        // Contoh: mengembalikan kata dasar atau bentuk dasar dari kata yang diberikan
+        return $word; // Ganti ini dengan hasil lemmatization yang sesungguhnya
+    }
+
+    private function calculateTFIDF($document, $corpus)
+    {
+        // Hitung Term Frequency (TF)
+        $tf = [];
+        $termCounts = array_count_values($document);
+        foreach ($document as $term) {
+            $tf[$term] = $termCounts[$term] / count($document);
+        }
+
+        // Hitung Inverse Document Frequency (IDF)
+        $idf = [];
+        $corpusSize = count($corpus);
+        foreach ($document as $term) {
+            $termInCorpus = array_count_values($corpus)[$term] ?? 0;
+            $idf[$term] = log($corpusSize / ($termInCorpus + 1));
+        }
+
+        // Hitung TF-IDF
+        $tfidf = [];
+        foreach ($document as $term) {
+            $tfidf[$term] = $tf[$term] * $idf[$term];
+        }
+
+        return $tfidf;
+    }
+
+    private function cosineSimilarity($vectorA, $vectorB)
+    {
+        $dotProduct = 0;
+        $magnitudeA = 0;
+        $magnitudeB = 0;
+
+        foreach ($vectorA as $term => $value) {
+            $dotProduct += $value * ($vectorB[$term] ?? 0);
+            $magnitudeA += pow($value, 2);
+        }
+
+        foreach ($vectorB as $value) {
+            $magnitudeB += pow($value, 2);
+        }
+
+        $magnitudeA = sqrt($magnitudeA);
+        $magnitudeB = sqrt($magnitudeB);
+
+        return $magnitudeA && $magnitudeB ? $dotProduct / ($magnitudeA * $magnitudeB) : 0;
     }
 }

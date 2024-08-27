@@ -98,7 +98,7 @@
                             </a>
                         </li>
 
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a href="{{ url('admin/brand') }}"
                                 class="nav-link {{ $secondSegment == 'brand' ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-table"></i>
@@ -106,7 +106,7 @@
                                     Brand
                                 </p>
                             </a>
-                        </li>
+                        </li> --}}
 
                         <li class="nav-item">
                             <a href="{{ url('admin/produk') }}"

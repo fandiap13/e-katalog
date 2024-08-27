@@ -91,7 +91,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group row">
+                            {{-- <div class="form-group row">
                                 <label for="brand" class="col-sm-2 col-form-label">Brand Produk <b
                                         class="text-danger">*</b></label>
                                 <div class="col-sm-6 controls">
@@ -104,7 +104,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-                            </div>
+                            </div> --}}
 
                             <div class="form-group row">
                                 <label for="keterangan" class="col-sm-2 col-form-label">Deskripsi Produk <b

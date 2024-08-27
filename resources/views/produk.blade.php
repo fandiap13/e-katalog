@@ -90,7 +90,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
+                                {{-- <div class="card">
                                     <div class="card-heading">
                                         <a data-toggle="collapse" data-target="#collapseTwo">Branding</a>
                                     </div>
@@ -118,7 +118,6 @@
                                                                     class="btn btn-link p-0 {{ $b->id == $brand_id ? 'font-weight-bold' : '' }}"
                                                                     style="text-decoration: none; color: #4f4f4f;">
                                                                     {{ $b->nama }}
-                                                                    {{-- ({{ count($b->produk) }}) --}}
                                                                 </button>
                                                             </form>
                                                         </li>
@@ -127,12 +126,12 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div> --}}
                                 <div class="card">
                                     <div class="card-heading">
-                                        <a data-toggle="collapse" data-target="#collapseThree">Filter Harga</a>
+                                        <a data-toggle="collapse" data-target="#collapseThree2">Filter Harga</a>
                                     </div>
-                                    <div id="collapseThree" class="collapse show" data-parent="#accordionExample">
+                                    <div id="collapseThree2" class="collapse show" data-parent="#accordionExample">
                                         <div class="card-body">
                                             <div class="row">
                                                 <form action="" method="GET">

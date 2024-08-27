@@ -34,10 +34,13 @@ class HomeController extends Controller
 
         $query = Produk::select("produk.*");
         $query->join('kategori', 'kategori.id', '=', 'produk.kategori_id');
-        $query->join('brand', 'brand.id', '=', 'produk.brand_id');
-        $query->whereRaw('LOWER(produk.nama) LIKE ?', ['%' . $search . '%']);
-        $query->orWhereRaw('LOWER(kategori.nama) LIKE ?', ['%' . $search . '%']);
-        $query->orWhereRaw('LOWER(brand.nama) LIKE ?', ['%' . $search . '%']);
+        $query->leftJoin('brand', 'brand.id', '=', 'produk.brand_id');
+
+        if (!empty($search)) {
+            $query->whereRaw('LOWER(produk.nama) LIKE ?', ['%' . $search . '%']);
+            $query->orWhereRaw('LOWER(kategori.nama) LIKE ?', ['%' . $search . '%']);
+            $query->orWhereRaw('LOWER(brand.nama) LIKE ?', ['%' . $search . '%']);
+        }
 
         // pencarian brand
         if (!empty($brand_id)) {
@@ -102,7 +105,7 @@ class HomeController extends Controller
 
         $produk_terkait = Produk::select("produk.*")
             ->where('kategori_id', $produk->kategori_id)
-            ->orWhere('brand_id', $produk->brand_id)
+            // ->orWhere('brand_id', $produk->brand_id)
             ->limit(4)
             ->get();
 
